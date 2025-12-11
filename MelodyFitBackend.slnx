@@ -1,1 +1,9 @@
-<Solution />
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MelodyFit.API/MelodyFit.API.csproj" />
+    <Project Path="src/MelodyFit.Application/MelodyFit.Application.csproj" />
+    <Project Path="src/MelodyFit.Domain/MelodyFit.Domain.csproj" />
+    <Project Path="src/MelodyFit.Infrastructure/MelodyFit.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/" />
+</Solution>
