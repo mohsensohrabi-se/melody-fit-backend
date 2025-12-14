@@ -1,7 +1,5 @@
 ﻿using MelodyFit.Domain.Common;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 
 namespace MelodyFit.Domain.Users.ValueObjects;
 
