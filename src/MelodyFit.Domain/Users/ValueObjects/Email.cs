@@ -15,8 +15,16 @@ public sealed class Email : ValueObject
     {
         if (string.IsNullOrWhiteSpace(value))
             return Result.Failure<Email>("Email is required");
-        if (!value.Contains("@"))
-            return Result.Failure<Email>("Invalid Email Format");
+
+        value = value.Trim().ToLower();
+        try
+        {
+            var _ = new System.Net.Mail.MailAddress(value);
+        }
+        catch
+        {
+            return Result.Failure<Email>("Invalid email format");
+        }
         return Result.Success<Email>(new Email(value));
     }
 

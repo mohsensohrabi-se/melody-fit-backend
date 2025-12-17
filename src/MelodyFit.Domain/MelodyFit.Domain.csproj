@@ -6,9 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Users\Aggregates\" />
-    <Folder Include="Users\Events\" />
-  </ItemGroup>
-
 </Project>
