@@ -7,7 +7,7 @@ public sealed class WorkoutSummary : ValueObject
     public int Steps { get; }
     public int Calories { get; }
     public double BpmAlignmentScore { get; }
-    public int MatchedSongsCount { get; }
+    //public int MatchedSongsCount { get; }
     public DateOnly Date { get; }
 
     private WorkoutSummary(
@@ -16,7 +16,7 @@ public sealed class WorkoutSummary : ValueObject
         int steps,
         int calories,
         double bpmAlignmentScore,
-        int matchedSongsCount,
+        //int matchedSongsCount,
         DateOnly date)
     {
         DistanceKm = distanceKm;
@@ -24,7 +24,7 @@ public sealed class WorkoutSummary : ValueObject
         Steps = steps;
         Calories = calories;
         BpmAlignmentScore = bpmAlignmentScore;
-        MatchedSongsCount = matchedSongsCount;
+        //MatchedSongsCount = matchedSongsCount;
         Date = date;
     }
 
@@ -34,7 +34,7 @@ public sealed class WorkoutSummary : ValueObject
         int steps,
         int calories,
         double bpmAlignmentScore,
-        int matchedSongsCount,
+        //int matchedSongsCount,
         DateOnly date)
     {
         if (distanceKm <= 0)
@@ -56,7 +56,7 @@ public sealed class WorkoutSummary : ValueObject
                 steps,
                 calories,
                 bpmAlignmentScore,
-                matchedSongsCount,
+                //matchedSongsCount,
                 date));
     }
 
@@ -67,7 +67,7 @@ public sealed class WorkoutSummary : ValueObject
         yield return Steps;
         yield return Calories;
         yield return BpmAlignmentScore;
-        yield return MatchedSongsCount;
+        //yield return MatchedSongsCount;
         yield return Date;
     }
 }
