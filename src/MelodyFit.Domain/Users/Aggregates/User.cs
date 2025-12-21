@@ -1,6 +1,8 @@
 ﻿using MelodyFit.Domain.Common;
 using MelodyFit.Domain.Users.Events;
 using MelodyFit.Domain.Users.ValueObjects;
+using MelodyFit.Domain.Workouts.Entities;
+using MelodyFit.Domain.Workouts.Events;
 
 
 namespace MelodyFit.Domain.Users.Aggregates
@@ -13,6 +15,8 @@ namespace MelodyFit.Domain.Users.Aggregates
         public UserProfile Profile { get; private set; }= null!;
         public DateTime CreatedAt { get; private set; }
 
+        private PersonalRecords _personalRecords = null!;
+        public PersonalRecords PersonalRecords => _personalRecords;
         private User(
             Email email,
             string passwordHash,
@@ -23,6 +27,8 @@ namespace MelodyFit.Domain.Users.Aggregates
             PasswordHash = passwordHash;
             Profile = profile;
             CreatedAt = DateTime.UtcNow;
+
+            _personalRecords = PersonalRecords.Create();
 
             AddDomainEvent(new UserRegisteredEvent(Id));
         }
@@ -46,6 +52,25 @@ namespace MelodyFit.Domain.Users.Aggregates
             var user = new User(EmailResult.Value, passwordHash, profile);
             return Result.Success<User>(user);
         }
+
+        public Result UpdatePersonalRecords(WorkoutSummary summary)
+        {
+            if (summary is null)
+                return Result.Failure("Workout summary is required");
+
+            var isNewRecord = _personalRecords.TryUpdate(summary);
+
+            if (isNewRecord)
+            {
+                AddDomainEvent(new PersonalRecordUpdatedEvent(
+                    Id,
+                    summary.Date
+                ));
+            }
+
+            return Result.Success();
+        }
+
 
         public Result UpdateProfile(UserProfile newProfile)
         {
