@@ -1,6 +1,5 @@
 ﻿using MelodyFit.Domain.Common;
 using MelodyFit.Domain.Workouts.Entities;
-using MelodyFit.Domain.Workouts.Events;
 using MelodyFit.Domain.Workouts.ValueObjects;
 
 
@@ -142,8 +141,8 @@ namespace MelodyFit.Domain.Workouts.Aggregates
         }
 
         public WorkoutSummary CalculateSummary(
-    double weightKg,
-    int songBpm)
+            double weightKg,
+            int songBpm)
         {
             return WorkoutSummary.Create(
                 distanceKm: EstimateDistanceMeters()/1000.0,
@@ -155,6 +154,21 @@ namespace MelodyFit.Domain.Workouts.Aggregates
                 bpmAlignmentScore: CalculateTempoScore(songBpm),
                 date: DateOnly.FromDateTime(StartTime)
             ).Value;
+        }
+
+        public Result<WorkoutStats> GetStats()
+        {
+            if (!_datapoints.Any())
+                return Result.Failure<WorkoutStats>("No workout data available");
+
+            var end = EndTime ?? DateTime.UtcNow;
+
+            return WorkoutStats.Create(
+                dataPoints: _datapoints,
+                startTime: StartTime,
+                endTime: end,
+                distanceMeters: EstimateDistanceMeters()
+            );
         }
 
         private static double DegreesToRadians(double deg) => deg * Math.PI / 180;
