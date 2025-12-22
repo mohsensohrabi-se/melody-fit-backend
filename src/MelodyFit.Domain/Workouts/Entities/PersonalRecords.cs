@@ -3,14 +3,14 @@
 
 namespace MelodyFit.Domain.Workouts.Entities
 {
-    public class PersonalRecords: BaseEntity
+    public class PersonalRecords : BaseEntity
     {
         public WorkoutDuration MaxWorkoutDuration { get; private set; }
         public int MaxBurnedCalories { get; private set; }
         public int MaxSteps { get; private set; }
         public double LongestDistanceKm { get; private set; }
 
-        private PersonalRecords() 
+        private PersonalRecords()
         {
             MaxWorkoutDuration = WorkoutDuration.Zero;
             MaxBurnedCalories = 0;
@@ -51,4 +51,5 @@ namespace MelodyFit.Domain.Workouts.Entities
 
             return isNewRecord;
         }
+    }
 }

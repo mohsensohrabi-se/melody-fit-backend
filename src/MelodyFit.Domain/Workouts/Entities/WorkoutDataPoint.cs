@@ -31,7 +31,7 @@ namespace MelodyFit.Domain.Workouts.Entities
             DateTime timeStamp,
             Cadence? cadence,
             Pace? pace,
-            GeoPoint location,
+            GeoPoint? location,
             int steps
             )
         {
