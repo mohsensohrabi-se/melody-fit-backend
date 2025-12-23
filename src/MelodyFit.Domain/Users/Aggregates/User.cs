@@ -1,7 +1,6 @@
 ﻿using MelodyFit.Domain.Common;
 using MelodyFit.Domain.Users.Events;
 using MelodyFit.Domain.Users.ValueObjects;
-using MelodyFit.Domain.Workouts.Entities;
 using MelodyFit.Domain.Workouts.Events;
 
 

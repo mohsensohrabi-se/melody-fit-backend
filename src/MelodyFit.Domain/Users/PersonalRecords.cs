@@ -1,7 +1,7 @@
 ﻿using MelodyFit.Domain.Common;
 
 
-namespace MelodyFit.Domain.Workouts.Entities
+namespace MelodyFit.Domain.Users
 {
     public class PersonalRecords : BaseEntity
     {
