@@ -17,8 +17,10 @@
     <Folder Include="Common\Behaviors\" />
     <Folder Include="Common\Exceptions\" />
     <Folder Include="Common\Interfaces\Messaging\" />
-    <Folder Include="Common\Interfaces\Services\" />
-    <Folder Include="Common\Interfaces\Persistence\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MelodyFit.Domain\MelodyFit.Domain.csproj" />
   </ItemGroup>
 
 </Project>

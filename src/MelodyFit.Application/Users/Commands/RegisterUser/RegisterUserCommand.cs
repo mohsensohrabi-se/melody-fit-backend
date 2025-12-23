@@ -1,10 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using MediatR;
+
 
 namespace MelodyFit.Application.Users.Commands.RegisterUser
 {
-    public class RegisterUserCommand
-    {
-    }
+    public sealed record RegisterUserCommand(
+        string Email,
+        string Password,
+        string FirstName,
+        string LastName,
+        DateTime? BirthDate,
+        string? Gender,
+        double? WeightKg,
+        double? HeightCm
+        ):IRequest<Guid>;
 }
