@@ -1,4 +1,5 @@
 ﻿using MelodyFit.Domain.Users.Aggregates;
+using MelodyFit.Domain.Users.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -45,6 +46,14 @@ namespace MelodyFit.Infrastructure.Persistence.Configurations
                 profile.Property(p => p.WeightKg);
                 profile.Property(p => p.HeightCm);
             });
+
+            builder.HasOne(u => u.PersonalRecords)
+                .WithOne()
+                .HasForeignKey<PersonalRecords>("UserId")
+                .IsRequired();
+
+            builder.Navigation(u=>u.PersonalRecords)
+                .IsRequired();
         }
     }
 }

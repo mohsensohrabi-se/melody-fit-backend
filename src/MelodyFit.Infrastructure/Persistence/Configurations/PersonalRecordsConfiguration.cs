@@ -12,6 +12,9 @@ namespace MelodyFit.Infrastructure.Persistence.Configurations
 
             builder.HasKey(pr => pr.Id);
 
+            builder.Property<Guid>("UserId")
+                .IsRequired();
+
             builder.Property(pr => pr.MaxBurnedCalories)
                 .IsRequired();
 
@@ -28,7 +31,8 @@ namespace MelodyFit.Infrastructure.Persistence.Configurations
                     .IsRequired();
             });
 
-
+            builder.HasIndex("UserId")
+                .IsUnique();
 
         }
     }
