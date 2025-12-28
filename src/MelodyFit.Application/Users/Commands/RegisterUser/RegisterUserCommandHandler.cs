@@ -23,7 +23,7 @@ namespace MelodyFit.Application.Users.Commands.RegisterUser
         public async Task<Guid> Handle(RegisterUserCommand request, CancellationToken cancellationToken)
         {
             // check to see if the email already registered or not
-            var existResult = await _userRepository.ExistByEmailAsync(request.Email);
+            var existResult = await _userRepository.ExistsByEmailAsync(request.Email);
             if (!existResult.IsSuccess)
                 throw new ApplicationException(existResult.Error);
 
@@ -48,7 +48,7 @@ namespace MelodyFit.Application.Users.Commands.RegisterUser
             // Register User
             var userResult = User.Register(
                 request.Email,
-                request.Password,
+                passwordHash,
                 profileResult.Value
                 );
             if(!userResult.IsSuccess)
