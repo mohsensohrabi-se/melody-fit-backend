@@ -11,4 +11,10 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\MelodyFit.Application\MelodyFit.Application.csproj" />
+    <ProjectReference Include="..\MelodyFit.Domain\MelodyFit.Domain.csproj" />
+    <ProjectReference Include="..\MelodyFit.Infrastructure\MelodyFit.Infrastructure.csproj" />
+  </ItemGroup>
+
 </Project>

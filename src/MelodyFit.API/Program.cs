@@ -1,6 +1,17 @@
 using MelodyFit.API.Middleware;
+using MelodyFit.Application.Common.Interfaces.Services;
+using MelodyFit.Infrastructure.Services.Email;
 
 var builder = WebApplication.CreateBuilder(args);
+
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddScoped<IEmailService, FakeEmailService>();
+}
+else
+{
+    builder.Services.AddScoped<IEmailService, SmtpEmailService>();
+}
 
 // Add services to the container.
 
