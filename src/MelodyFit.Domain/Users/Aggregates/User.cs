@@ -13,6 +13,7 @@ namespace MelodyFit.Domain.Users.Aggregates
         public Email Email { get; private set; } = null!;
         public string PasswordHash { get; private set; } = null!;
         public UserProfile Profile { get; private set; }= null!;
+        public UserRole Role { get; private set; }
         public DateTime CreatedAt { get; private set; }
 
         private PersonalRecords _personalRecords = null!;
@@ -26,6 +27,7 @@ namespace MelodyFit.Domain.Users.Aggregates
             Email = email;
             PasswordHash = passwordHash;
             Profile = profile;
+            Role = UserRole.User;
             CreatedAt = DateTime.UtcNow;
 
             _personalRecords = PersonalRecords.Create();
@@ -68,6 +70,14 @@ namespace MelodyFit.Domain.Users.Aggregates
                 ));
             }
 
+            return Result.Success();
+        }
+
+        public Result PromoteAdmin()
+        {
+            if (Role == UserRole.Admin)
+                return Result.Failure("User is already an admin");
+            Role = UserRole.Admin;
             return Result.Success();
         }
 

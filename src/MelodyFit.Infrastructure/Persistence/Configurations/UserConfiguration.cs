@@ -47,6 +47,14 @@ namespace MelodyFit.Infrastructure.Persistence.Configurations
                 profile.Property(p => p.HeightCm);
             });
 
+            builder.OwnsOne(u => u.Role, role => 
+            {
+                role.Property(r => r.Name)
+                    .HasColumnName("Role")
+                    .IsRequired()
+                    .HasMaxLength(20);
+            });
+
             builder.HasOne(u => u.PersonalRecords)
                 .WithOne()
                 .HasForeignKey<PersonalRecords>("UserId")
