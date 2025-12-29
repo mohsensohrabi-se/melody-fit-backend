@@ -1,85 +1,62 @@
 ﻿using System.Net;
-using System.Text.Json;
+using MelodyFit.Application.Common.Exceptions;
 using FluentValidation;
 
-namespace MelodyFit.API.Middleware
+namespace MelodyFit.API.Middleware;
+
+public sealed class GlobalExceptionMiddleware
 {
-    public class GlobalExceptionMiddleware
+    private readonly RequestDelegate _next;
+    private readonly ILogger<GlobalExceptionMiddleware> _logger;
+
+    public GlobalExceptionMiddleware(
+        RequestDelegate next,
+        ILogger<GlobalExceptionMiddleware> logger)
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger<GlobalExceptionMiddleware> _logger;
+        _next = next;
+        _logger = logger;
+    }
 
-        public GlobalExceptionMiddleware(
-            RequestDelegate next,
-            ILogger<GlobalExceptionMiddleware> logger)
+    public async Task Invoke(HttpContext context)
+    {
+        try
         {
-            _next = next;
-            _logger = logger;
+            await _next(context);
         }
-        public async Task InvokeAsync(HttpContext context)
+        catch (ValidationException ex)
         {
-            try
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+            await context.Response.WriteAsJsonAsync(new
             {
-                await _next(context);
-            }
-            catch(ValidationException ex)
-            {
-                _logger.LogWarning(ex, "Validation failed");
-                await WriteErrorResponse(
-                    context,
-                    HttpStatusCode.BadRequest,
-                    "Validation failed",
-                    ex.Errors.Select(ex=>ex.ErrorMessage)
-                    );
-            }
-            catch(UnauthorizedAccessException ex)
-            {
-                _logger.LogWarning(ex, "Unauthorized access");
-                await WriteErrorResponse(
-                    context,
-                    HttpStatusCode.Unauthorized,
-                    ex.Message
-                    );
-            }
-            catch(InvalidOperationException ex)
-            {
-                _logger.LogWarning(ex,"Invalid operation");
-                await WriteErrorResponse(
-                    context,
-                    HttpStatusCode.BadRequest,
-                    ex.Message
-                    );
-            }
-            catch(Exception ex)
-            {
-                _logger.LogError(ex, "Unhandled exception");
-                await WriteErrorResponse(
-                    context,
-                    HttpStatusCode.InternalServerError,
-                    "An unexpected error occured"
-                    );
-
-            }
+                error = "Validation failed",
+                details = ex.Errors.Select(e => e.ErrorMessage)
+            });
         }
-        private async Task WriteErrorResponse(
-            HttpContext context,
-            HttpStatusCode statusCode,
-            string message,
-            IEnumerable<string>? errors = null
-            )
+        catch (ConflictException ex)
         {
-            context.Response.ContentType = "application/json";
-            context.Response.StatusCode = (int)statusCode;
-            var response = new 
+            context.Response.StatusCode = StatusCodes.Status409Conflict;
+            await context.Response.WriteAsJsonAsync(new
             {
-                status = context.Response.StatusCode,
-                message,
-                errors
-            };
+                error = ex.Message
+            });
+        }
+        catch (NotFoundException ex)
+        {
+            context.Response.StatusCode = StatusCodes.Status404NotFound;
+            await context.Response.WriteAsJsonAsync(new
+            {
+                error = ex.Message
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unhandled exception");
 
-            await context.Response.WriteAsync(
-                JsonSerializer.Serialize(response)
-                );
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            await context.Response.WriteAsJsonAsync(new
+            {
+                error = "An unexpected error occurred"
+            });
         }
     }
 }

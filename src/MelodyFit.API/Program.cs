@@ -1,4 +1,7 @@
+using FluentValidation;
+using MediatR;
 using MelodyFit.API.Middleware;
+using MelodyFit.Application.Common.Behaviors;
 using MelodyFit.Application.Common.Interfaces.Messaging;
 using MelodyFit.Application.Common.Interfaces.Persistence;
 using MelodyFit.Application.Common.Interfaces.Services;
@@ -23,12 +26,19 @@ builder.Services.AddDbContext<MelodyFitDbContext>(options =>
         });
 });
 
+// Behavior pipeline
+builder.Services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
 // Register domain event dispatcher
 builder.Services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
 // Register Repositories 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
+// Register Fluent validation
+builder.Services.AddValidatorsFromAssembly(
+    MelodyFit.Application.AssemblyReference.Assembly
+    );
 
 //Register Services
 builder.Services.AddScoped<IPasswordService,PasswordService >();
@@ -53,6 +63,10 @@ builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -62,7 +76,8 @@ app.UseMiddleware<GlobalExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
