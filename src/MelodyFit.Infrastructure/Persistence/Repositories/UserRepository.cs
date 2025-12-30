@@ -46,12 +46,14 @@ namespace MelodyFit.Infrastructure.Persistence.Repositories
         {
             try
             {
+                var normalizedEmail = email.Trim().ToLower();
+
                 var user = await _context.Users
                     .Include(u => u.PersonalRecords)
-                    .FirstOrDefaultAsync(u => u.Email.Value == email);
+                    .FirstOrDefaultAsync(u => u.Email.Value == normalizedEmail);
 
                 if (user is null)
-                    return Result.Failure<User?>(null);
+                    return Result.Success<User?>(null);
                 return Result.Success<User?>(user);
             }
             catch(Exception ex)
