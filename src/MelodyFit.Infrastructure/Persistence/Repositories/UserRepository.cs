@@ -42,6 +42,24 @@ namespace MelodyFit.Infrastructure.Persistence.Repositories
             }
         }
 
+        public async Task<Result<User?>> GetByEmailAsync(string email)
+        {
+            try
+            {
+                var user = await _context.Users
+                    .Include(u => u.PersonalRecords)
+                    .FirstOrDefaultAsync(u => u.Email.Value == email);
+
+                if (user is null)
+                    return Result.Failure<User?>(null);
+                return Result.Success<User?>(user);
+            }
+            catch(Exception ex)
+            {
+                return Result.Failure<User?>($"Database error: {ex.Message}");
+            }
+        }
+
         public async Task<Result<User?>> GetByIdAsync(Guid id)
         {
             try

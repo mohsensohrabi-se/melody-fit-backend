@@ -9,5 +9,6 @@ namespace MelodyFit.Application.Common.Interfaces.Persistence
         Task<Result> AddAsync(User user);
         Task<Result<bool>> ExistsByEmailAsync(string email);
         Task<Result<User?>> GetByIdAsync(Guid id);
+        Task<Result<User?>> GetByEmailAsync(string email);
     }
 }
