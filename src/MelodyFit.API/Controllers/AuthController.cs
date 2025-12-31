@@ -1,4 +1,6 @@
 ﻿using MediatR;
+using MelodyFit.API.Contracts.Auth;
+using MelodyFit.Application.Users.Commands.LoginUser;
 using MelodyFit.Application.Users.Commands.RegisterUser;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +24,7 @@ namespace MelodyFit.API.Controllers
         [ProducesResponseType(typeof(Guid),StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Register(
-            [FromBody] RegisterUserCommand request,
+            [FromBody] RegisterUserRequest request,
             CancellationToken cancellationToken
             )
         {
@@ -40,5 +42,21 @@ namespace MelodyFit.API.Controllers
             var userId = await _mediator.Send(command);
             return CreatedAtAction(nameof(Register), new { id = userId }, userId);
         }
+
+        ///<summary>
+        /// User login
+        ///</summary>
+        [HttpPost("login")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Login(LoginUserRequest request)
+        {
+            var command = new LoginUserCommand(
+                request.Email,
+                request.Password);
+            var result = await _mediator.Send(command);
+            return Ok(result);
+
+        }
+
     }
 }

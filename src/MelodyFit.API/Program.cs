@@ -10,38 +10,49 @@ using MelodyFit.Infrastructure.Persistence;
 using MelodyFit.Infrastructure.Persistence.Repositories;
 using MelodyFit.Infrastructure.Services.Email;
 using MelodyFit.Infrastructure.Services.Security;
-using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Register Db Context + PostgreSQL
+// --------------------
+// DbContext + PostgreSQL
+// --------------------
 builder.Services.AddDbContext<MelodyFitDbContext>(options =>
 {
     options.UseNpgsql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
-        npgsql =>
-        {
-            npgsql.MigrationsAssembly("MelodyFit.Infrastructure");
-        });
+        npgsql => npgsql.MigrationsAssembly("MelodyFit.Infrastructure"));
 });
 
-// Behavior pipeline
+// --------------------
+// MediatR + Validation
+// --------------------
+builder.Services.AddMediatR(cfg =>
+    cfg.RegisterServicesFromAssembly(MelodyFit.Application.AssemblyReference.Assembly));
+
 builder.Services.AddScoped(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
-// Register domain event dispatcher
+builder.Services.AddValidatorsFromAssembly(
+    MelodyFit.Application.AssemblyReference.Assembly);
+
+// --------------------
+// Domain events
+// --------------------
 builder.Services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
 
-// Register Repositories 
+// --------------------
+// Repositories
+// --------------------
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-// Register Fluent validation
-builder.Services.AddValidatorsFromAssembly(
-    MelodyFit.Application.AssemblyReference.Assembly
-    );
-
-//Register Services
-builder.Services.AddScoped<IPasswordService,PasswordService >();
+// --------------------
+// Services
+// --------------------
+builder.Services.AddScoped<IPasswordService, PasswordService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 if (builder.Environment.IsDevelopment())
 {
@@ -52,36 +63,63 @@ else
     builder.Services.AddScoped<IEmailService, SmtpEmailService>();
 }
 
-// Register MediatR 
-builder.Services.AddMediatR(cfg=>
-    cfg.RegisterServicesFromAssembly(MelodyFit.Application.AssemblyReference.Assembly)
-);
+// --------------------
+// JWT Authentication
+// --------------------
+builder.Services.Configure<JwtOptions>(
+    builder.Configuration.GetSection("Jwt"));
 
-// Add services to the container.
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var jwt = builder.Configuration.GetSection("Jwt");
 
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+
+            ValidIssuer = jwt["Issuer"],
+            ValidAudience = jwt["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwt["SecretKey"]!)),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+// --------------------
+// Controllers + OpenAPI
+// --------------------
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(); // Native .NET 10 OpenAPI
 
-// Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// --------------------
+// CORS
+// --------------------
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod());
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-
-//Custom Middleware to catch errors
+// --------------------
+// Middleware pipeline
+// --------------------
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi(); // /openapi/v1.json
 }
 
-app.UseHttpsRedirection();
-
+app.UseCors("AllowAll");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
