@@ -16,10 +16,10 @@ namespace MelodyFit.Infrastructure.Services.Security
             return Task.FromResult( hash );
         }
 
-        public bool Verify(string password, string hash)
+        public Task<bool> Verify(string password, string hash)
         {
             var result = BCrypt.Net.BCrypt.Verify(password, hash);
-            return result;
+            return Task.FromResult(result);
         }
     }
 }
