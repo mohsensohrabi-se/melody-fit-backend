@@ -18,6 +18,11 @@ namespace MelodyFit.Domain.Users.Aggregates
 
         private PersonalRecords _personalRecords = null!;
         public PersonalRecords PersonalRecords => _personalRecords;
+
+        //Refresh tokens
+        private readonly List<RefreshToken> _refreshTokens = new();
+        public IReadOnlyCollection<RefreshToken> RefreshTokens => _refreshTokens.AsReadOnly();
+
         private User(
             Email email,
             string passwordHash,
@@ -89,5 +94,54 @@ namespace MelodyFit.Domain.Users.Aggregates
             Profile = newProfile;
             return Result.Success();
         }
+
+        // Methods related to refresh token
+        public Result AddRefreshToken(RefreshToken token)
+        {
+            if (token is null)
+                return Result.Failure("Refresh token can not be null");
+            _refreshTokens.Add(token);
+            return Result.Success();
+        }
+
+        public RefreshToken? GetRefreshToken(string tokenHash)
+        {
+            return _refreshTokens.SingleOrDefault(t => t.TokenHash == tokenHash);
+        }
+
+        public Result RotateRefreshToken(
+            string currentTokenHash,
+            RefreshToken newToken,
+            string? ipAddress)
+        {
+            var existing = GetRefreshToken(currentTokenHash);
+            if (existing is null)
+                return Result.Failure("Refresh token not found");
+            if (!existing.IsActive)
+                return Result.Failure("Refresh token is not active");
+            existing.RevokeAndRotation(newToken.Id, ipAddress);
+            _refreshTokens.Add(newToken);
+            return Result.Success();
+        }
+
+        // Logout -- revoke single token
+        public Result RevokeRefreshToken(string tokenHash, string? ipAddress = null)
+        {
+            var token = GetRefreshToken(tokenHash);
+            if (token is null)
+                return Result.Failure("Refresh token not found");
+            token.Revoke(ipAddress);
+            return Result.Success();
+        }
+
+        public Result RevokeAllRefreshTokens(string? ipAddress = null)
+        {
+            foreach(var token in _refreshTokens.Where(t => t.IsActive))
+            {
+                token.Revoke(ipAddress);
+            }
+            return Result.Success();
+        }
+
     }
 }
