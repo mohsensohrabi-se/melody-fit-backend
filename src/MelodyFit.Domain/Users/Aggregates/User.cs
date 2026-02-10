@@ -57,6 +57,8 @@ namespace MelodyFit.Domain.Users.Aggregates
                 return Result.Failure<User>("PasswordHash is required");
 
             var user = new User(EmailResult.Value, passwordHash, profile);
+
+            
             return Result.Success<User>(user);
         }
 
